@@ -74,16 +74,20 @@ class Accounts_database(Database):
 
 
     # Displays data
-    def displayData(self):
-        self.selectFromDatabase(self.table_name)
+    def displayData(self, database_selection="*"):
+        self.selectFromDatabase(self.table_name, database_selection)
         items = self.cursor.fetchall()
+        range_val = 5 if database_selection == "*" else 6
 
         # Formats data with a table
-        table = pt(["ID", "Username", "Website Name", "Website URL", "Password", "Email"])
+        if database_selection == "*":
+            table = pt(["Username", "Website Name", "Website URL", "Password", "Email"])
+        else:
+            table = pt(["ID", "Username", "Website Name", "Website URL", "Password", "Email"])
         for item in items:
-            table.add_row([item[i] for i in range(6)])
+            table.add_row([item[i] for i in range(range_val)])
 
-        print(f"\n{self.table_name.upper()}") # Prints The Table name
+        print(f"\n{self.table_name.upper()}: {len(items)}") # Prints The Table name
         print(table) # Prints the table
 
 
@@ -140,16 +144,21 @@ class Master_database(Database):
 
 
     # Displays data
-    def displayData(self):
-        self.selectFromDatabase(self.table_name)
+    def displayData(self, database_selection):
+        self.selectFromDatabase(self.table_name, database_selection)
         items = self.cursor.fetchall()
+        range_val = 4 if database_selection == "*" else 5
+
 
         # Formats data with a table
-        table = pt(["ID", "Username", "Password Salt", "Master Password Hash", "Email"])
+        if database_selection == "*":
+            table = pt(["Username", "Password Salt", "Master Password Hash", "Email"])
+        else:
+            table = pt(["ID", "Username", "Password Salt", "Master Password Hash", "Email"])
         for item in items:
-            table.add_row([item[i] for i in range(5)])
+            table.add_row([item[i] for i in range(range_val)])
 
-        print(f"\n{self.table_name.upper()}") # Prints The Table name
+        print(f"\n{self.table_name.upper()}: {len(items)}") # Prints The Table name
         print(table) # Prints the table
 
 
