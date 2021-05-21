@@ -27,12 +27,12 @@ class Database:
 
 
     # Selects from database tables
-    def selectFromDatabase(self, database, command=None):
+    def selectFromDatabase(self, table, selection="rowid, *", command=None):
 
         if command != None:
-            self.cursor.execute(f"SELECT rowid, * FROM {database} {command}")
+            self.cursor.execute(f"SELECT {selection} FROM {table} {command}")
         else:
-            self.cursor.execute(f"SELECT rowid, * FROM {database}")
+            self.cursor.execute(f"SELECT {selection} FROM {table}")
 
         self.commitDatabase()
     
