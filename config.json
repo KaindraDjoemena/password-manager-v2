@@ -1,6 +1,7 @@
 {
   "config": {
     "have_created_accounts_table": false,
-    "have_created_master_table": false
+    "have_created_master_table": false,
+    "have_created_key": false
   }
 }
