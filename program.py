@@ -1,18 +1,25 @@
 import os
-from prettytable import PrettyTable as pt
-from database import Accounts_database
+import json
+import hashlib
+from crypto import Crypto
 from database import Master_database
+from database import Accounts_database
+from prettytable import PrettyTable as pt
 
 
 class Program:
-
+    
     def __init__(self):
 
         # Databases
         self.accounts_database = Accounts_database("accounts_database", "accounts_table")
         self.master_database = Master_database("master_database", "master_table")
     
-    
+        self.crypto = Crypto()
+        with open(".key.json") as json_file:
+            self.enc_key = json.load(json_file)
+
+
     # Notifies the user
     def notifyUser(self, notification):
         print(f" {notification}")
@@ -47,6 +54,7 @@ class Program:
 
     # Main page of the program
     def mainPage(self):
+
         run = True
         while run:
             user_input = input("\nm>>")
@@ -114,21 +122,20 @@ class Program:
             if self.validInput(website_url_input):
                 break
 
-        
+
         while True:
 
             # Adds the data to the database if the user proceeds to
             confirmation = input("\n  >>proceed?(Y/N): ")
-            
             if self.validInput(confirmation):
 
                 if confirmation.lower() == "y":
                     self.accounts_database.insertToDatabase(
-                        username_input,
-                        website_name_input,
-                        website_name_input,
-                        password_input,
-                        email_input
+                        self.crypto.encrypt(username_input, self.enc_key),
+                        self.crypto.encrypt(website_name_input, self.enc_key),
+                        self.crypto.encrypt(website_url_input, self.enc_key),
+                        self.crypto.encrypt(password_input, self.enc_key),
+                        self.crypto.encrypt(email_input, self.enc_key)
                         )
                     self.notifyUser("  successfully added to the database")
                     break
@@ -138,11 +145,11 @@ class Program:
                     break
 
 
-
     """
     DELETE PAGE
 
     """
+
 
 
     # Deletes data from the database
@@ -164,21 +171,32 @@ class Program:
             username_input = input("  username: ")
             if self.validInput(username_input):
                 break
-        
+
         # Adds the data to the database if the user proceeds to
         while True:
             confirmation = input("\n  >>proceed?(Y/N): ")
-            
+
             if self.validInput(confirmation):
 
                 if confirmation.lower() == "y":
-                    self.accounts_database.deleteFromDatabase(f"WHERE website_name={website_name_input} AND username={username_input}")
-                    self.notifyUser("  successfully deleted to the database")
-                    break
+
+                    self.accounts_database.cursor.execute(f"SELECT * from {self.accounts_database.table_name}")
+                    
+                    database_item = self.accounts_database.cursor.fetchall()
+                    
+                    traversal_count = 0
+                    for item in database_item:
+                        if (item[0] == self.crypto.encrypt(username_input, self.enc_key)) and (item[1] == self.crypto.encrypt(website_name_input, self.enc_key)):
+                            self.accounts_database.deleteFromDatabase(f"WHERE username='{self.crypto.encrypt(username_input, self.enc_key)}' AND website_name='{self.crypto.encrypt(website_name_input, self.enc_key)}'")
+                            self.notifyUser("  successfully deleted from the database")
+                            traversal_count += 1
+                    if traversal_count == len(database_item):
+                        self.notifyUser("  cant find item")
+                    
 
                 elif confirmation.lower() == "n":
                     self.notifyUser("  action cancelled")
-                    break
+                break
 
 
     """
@@ -194,43 +212,8 @@ class Program:
         print("  <display>")
 
         self.accounts_database.displayData()
-    
-
-
-    """
-    SEARCH PAGE
-    
-    """
 
 
 
-    def searchPage(self):
-        run = True
-        while run:
-            print("  <search>")
-            user_input = input("  s>>")
-
-            # Gets the command from the user
-            if user_input == "":
-                self.accounts_database.selectFromDatabase(self.accounts_database.table_name)
-            else:
-                try:
-                    self.accounts_database.selectFromDatabase(self.accounts_database.table_name, user_input)
-                except:
-                    self.notifyUser("  invalid command")
-
-            items = self.accounts_database.cursor.fetchall()
-            if len(items) == 0:
-                self.notifyUser("  item unavailable")
-
-            else:
-
-                # Formats data with a table
-                table = pt(["ID", "Username", "Website Name", "Website URL", "Password", "Email"])
-                for item in items:
-                    table.add_row([item[i] for i in range(6)])
-
-                print(f"\n{self.accounts_database.table_name.upper()}") # Prints The Table name
-                print(table) # Prints the table
-
-            break
+if __name__ == "__main__":
+    pass
