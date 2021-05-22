@@ -13,6 +13,9 @@ class Accounts_database(Database):
     def __init__(self, database_name, table_name):
         super().__init__(database_name, table_name)
 
+        with open(".key.json") as json_file:
+            self.enc_key = json.load(json_file)
+
         # Makes a table if havent by looking up the config.json file
         with open("config.json", "r") as json_file:
             config_file = json.load(json_file)
@@ -85,7 +88,7 @@ class Accounts_database(Database):
         else:
             table = pt(["ID", "Username", "Website Name", "Website URL", "Password", "Email"])
         for item in items:
-            table.add_row([item[i] for i in range(range_val)])
+            table.add_row([self.crypto.decrypt(item[i], self.enc_key) for i in range(range_val)])
 
         print(f"\n{self.table_name.upper()}: {len(items)}") # Prints The Table name
         print(table) # Prints the table
@@ -95,6 +98,9 @@ class Accounts_database(Database):
 class Master_database(Database):
     def __init__(self, database_name, table_name):
         super().__init__(database_name, table_name)
+
+        with open(".key.json") as json_file:
+            self.enc_key = json.load(json_file)
 
         # Makes a table if havent by looking up the config.json file
         with open("config.json", "r") as json_file:
@@ -156,7 +162,7 @@ class Master_database(Database):
         else:
             table = pt(["ID", "Username", "Password Salt", "Master Password Hash", "Email"])
         for item in items:
-            table.add_row([item[i] for i in range(range_val)])
+            table.add_row([self.crypto.decrypt(item[i], self.enc_key) for i in range(range_val)])
 
         print(f"\n{self.table_name.upper()}: {len(items)}") # Prints The Table name
         print(table) # Prints the table
