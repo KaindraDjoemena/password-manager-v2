@@ -93,7 +93,7 @@ class Program:
                     break
             
             while True:
-                user_confirmation = input("continue?(Y/N): ")
+                user_confirmation = input("\ncontinue?(Y/N): ")
                 if user_confirmation.lower() == "y":
 
                     salt = ""
@@ -101,11 +101,11 @@ class Program:
                     while i < random.randint(5, 16):
                         salt += random.choice("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890`~!@#$%^&*()-_=+[]|;:,<.>/?")
                         i += 1
-                    
+
                     # Storing the salt
                     with open("config.json") as json_file:
                         config_file = json.load(json_file)
-                    
+
                     config_file["config"]["salt"] = salt
 
                     with open("config.json", "w") as json_file:
@@ -113,22 +113,26 @@ class Program:
 
                     # Hashed master password + salt
                     hashed_master_password_salt = hashlib.sha256((master_password_input + salt).encode()).hexdigest()
-                    
+
                     # Insert data
-                    self.master_database.insertToDatabase(
-                        self.crypto.encrypt(username_input, self.enc_key),
-                        self.crypto.encrypt(salt, self.enc_key),
-                        self.crypto.encrypt(hashed_master_password_salt, self.enc_key),
-                        self.crypto.encrypt(email_input, self.enc_key)
-                    )
+                    try:
+                        self.master_database.insertToDatabase(
+                            self.crypto.encrypt(username_input, self.enc_key),
+                            self.crypto.encrypt(salt, self.enc_key),
+                            self.crypto.encrypt(hashed_master_password_salt, self.enc_key),
+                            self.crypto.encrypt(email_input, self.enc_key)
+                        )
 
-                    with open("config.json") as json_file:
-                        config_file = json.load(json_file)
-                    
-                    config_file["config"]["have_signed_up"] = True
+                        with open("config.json") as json_file:
+                            config_file = json.load(json_file)
 
-                    with open("config.json", "w") as json_file:
-                        json.dump(config_file, json_file, indent=2)
+                        config_file["config"]["have_signed_up"] = True
+
+                        with open("config.json", "w") as json_file:
+                            json.dump(config_file, json_file, indent=2)
+
+                    except:
+                        self.notifyUser("invalid input")
 
                     quit()
 
@@ -148,14 +152,14 @@ class Program:
         run = True
         while run:
             user_input = input("master password: ")
-            
+
             self.master_database.selectFromDatabase(self.master_database.table_name, "*")
             items = self.master_database.cursor.fetchall()
 
             # Get salt
             with open("config.json") as json_file:
                 config_file = json.load(json_file)
-            
+
             salt = config_file["config"]["salt"]
 
             salted_user_input = user_input + salt
@@ -168,7 +172,7 @@ class Program:
             if hashed_master_password == hashed_salted_user_input:
                 os.system("cls")
                 self.mainPage()
-            
+
             else:
                 quit()
 
@@ -200,8 +204,6 @@ class Program:
                     self.deletePage()
                 elif user_input == "p search":
                     self.searchPage()
-                elif user_input == "ye ah":
-                    self.master_database.displayData("*")
                 else:
                     self.notifyUser("invalid input")
 
@@ -261,14 +263,19 @@ class Program:
             if self.validInput(confirmation):
 
                 if confirmation.lower() == "y":
-                    self.accounts_database.insertToDatabase(
-                        self.crypto.encrypt(username_input, self.enc_key),
-                        self.crypto.encrypt(website_name_input, self.enc_key),
-                        self.crypto.encrypt(website_url_input, self.enc_key),
-                        self.crypto.encrypt(password_input, self.enc_key),
-                        self.crypto.encrypt(email_input, self.enc_key)
-                        )
-                    self.notifyUser("  successfully added to the database")
+                    try:
+                        self.accounts_database.insertToDatabase(
+                            self.crypto.encrypt(username_input, self.enc_key),
+                            self.crypto.encrypt(website_name_input, self.enc_key),
+                            self.crypto.encrypt(website_url_input, self.enc_key),
+                            self.crypto.encrypt(password_input, self.enc_key),
+                            self.crypto.encrypt(email_input, self.enc_key)
+                            )
+                        self.notifyUser("  successfully added to the database")
+
+                    except:
+                        self.notifyUser("  invalid input")
+
                     break
 
                 elif confirmation.lower() == "n":
@@ -361,7 +368,7 @@ class Program:
 
             # Gets the command from the user
             if user_input != "":
-                
+
                 try:
                     first_comma_i = user_input.index("'")
                     last_comma_i = len(user_input)-1
@@ -371,7 +378,7 @@ class Program:
                     encrypted_key_word = self.crypto.encrypt(key_word, self.enc_key)
 
                     new_command = user_input[:first_comma_i+1] + encrypted_key_word + user_input[last_comma_i:]
-                
+
                 except:
                     self.notifyUser("  invalid command")
 
