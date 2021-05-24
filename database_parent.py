@@ -4,7 +4,7 @@ from crypto import Crypto
 
 
 class Database:
-    
+
     # Establish connection to the database
     def __init__(self, database_name, table_name):
 
@@ -39,7 +39,7 @@ class Database:
     # Inserts to the accounts table
     def insertToDatabaseAccounts(self):
         pass
-    
+
 
     # Inserts to the user_data table
     def insertToDatabaseUserData(self):
@@ -47,12 +47,15 @@ class Database:
 
 
     # Selects from database tables
-    def selectFromDatabase(self, table, selection="rowid, *"):
+    def selectFromDatabase(self, table, selection="rowid, *", command=None):
 
         self.cursor.execute(f"SELECT {selection} FROM {table}")
 
+        if command != None:
+            self.cursor.execute(f"SELECT {selection} FROM {table} {command}")
+
         self.commitDatabase()
-    
+
 
     # Delete from database table
     def deleteFromDatabase(self, table_name, command):
@@ -60,8 +63,6 @@ class Database:
         self.cursor.execute(f"""DELETE from {table_name} {command}""")
 
         self.commitDatabase()
-
-        self.notifyUser(f"deleted element from database with: '{command}'")
 
 
     # Displays data
