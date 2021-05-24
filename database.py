@@ -22,7 +22,7 @@ class Accounts_database(Database):
         self.have_created_table = config_file["config"]["have_created_accounts_table"]
         if not self.have_created_table:
             self.makeTable()
-    
+
 
     # Make Table
     def makeTable(self):
@@ -41,7 +41,7 @@ class Accounts_database(Database):
         # Changes the config file to have made the accounts table
         with open("config.json") as json_file:
             config_file = json.load(json_file)
-        
+
         config_file["config"]["have_created_accounts_table"] = True
 
         with open("config.json", "w") as json_file:
@@ -64,7 +64,7 @@ class Accounts_database(Database):
         self.commitDatabase()
 
         self.notifyUser(f"inserted data to {self.table_name} table")
-    
+
 
     # Delete from database table
     def deleteFromDatabase(self, command):
@@ -132,12 +132,12 @@ class Master_database(Database):
             json.dump(config_file, json_file, indent=2)
 
         self.notifyUser(f"made {self.table_name} table")
-    
-    
+
+
     # Insert data to table
     def insertToDatabase(self, username, salt, master_password_hash, email):
         
-        self.cursor.execute("""INSERT INTO user_data VALUES (:username, :master_password, :email)""", {
+        self.cursor.execute(f"""INSERT INTO {self.table_name} VALUES (:username, :salt, :master_password_hash, :email)""", {
             "username"            : username,
             "salt"                : salt,
             "master_password_hash": master_password_hash,
@@ -166,6 +166,7 @@ class Master_database(Database):
 
         print(f"\n{self.table_name.upper()}: {len(items)}") # Prints The Table name
         print(table) # Prints the table
+
 
 
 if __name__ == "__main__":
