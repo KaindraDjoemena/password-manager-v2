@@ -191,6 +191,7 @@ class Program:
         run = True
         while run:
             print("\n<main>")
+            print("  ['help'] for help")
             user_input = input(">>")
             if self.validInput(user_input):
                 self.handleBasicInput(user_input)
@@ -204,9 +205,30 @@ class Program:
                     self.deletePage()
                 elif user_input == "p search":
                     self.searchPage()
+                elif user_input == "help":
+                    self.helpPanel()
                 else:
                     self.notifyUser("invalid input")
 
+
+
+    """
+    HELP PANEL
+    
+    """
+
+
+    # Lists the commands
+    def helpPanel(self):
+        print("  \n<help>")
+        print("  +---------------------------+")
+        print("  | 'clear' > clears window   |")
+        print("  | 'exit' > exit program     |")
+        print("  | 'p display' > display page|")
+        print("  | 'p add' > add page        |")
+        print("  | 'p delete' > delete page  |")
+        print("  | 'p search' > search page  |")
+        print("  +---------------------------+")
 
 
     """
