@@ -1,3 +1,10 @@
+"""
+Author: Kaindra Djoemena
+Github: https://github.com/KaindraDjoemena
+
+"""
+
+
 import json
 from prettytable import PrettyTable as pt
 from database_parent import Database
@@ -72,8 +79,9 @@ class Accounts_database(Database):
         self.cursor.execute(f"""DELETE from {self.table_name} {command}""")
 
         self.commitDatabase()
+        self.notifyUser("successfully deleted")
 
-        self.notifyUser(f"deleted element from database with: '{command}'")
+        # self.notifyUser(f"deleted element from database with: '{command}'")
 
 
     # Displays data
