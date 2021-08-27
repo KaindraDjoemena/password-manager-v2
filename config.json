@@ -3,7 +3,7 @@
     "have_created_accounts_table": false,
     "have_created_master_table": false,
     "have_signed_up": false,
-    "salt": null,
-    "have_created_key": false
+    "have_created_key": false,
+    "salt": null
   }
 }
