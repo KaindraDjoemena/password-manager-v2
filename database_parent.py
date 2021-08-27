@@ -1,3 +1,10 @@
+"""
+Author: Kaindra Djoemena
+Github: https://github.com/KaindraDjoemena
+
+"""
+
+
 import json
 import sqlite3
 from crypto import Crypto
@@ -29,6 +36,14 @@ class Database:
         self.table_name = table_name
         self.connection = sqlite3.connect(f"{database_name}.db")
         self.cursor = self.connection.cursor()
+
+
+    # Delete table
+    def deleteTable(self):
+        self.cursor.execute(f"""DROP TABLE {self.table_name}""")
+
+        self.commitDatabase()
+        self.notifyUser(f"Deleted {self.table_name}")
 
 
     # Make table
