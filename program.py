@@ -10,8 +10,6 @@ import json
 import os
 import random
 from random import choices
-import time
-from time import sleep
 import hashlib
 from crypto import Crypto
 from database import Master_database
@@ -22,6 +20,9 @@ from prettytable import PrettyTable as pt
 class Program:
     
     def __init__(self):
+
+        # Random password length is 30
+        self.random_password_len = 30
 
         # Databases
         self.accounts_database = Accounts_database("accounts_database", "accounts_table")
@@ -181,9 +182,10 @@ class Program:
                         self.notifyUser("invalid input")
 
                     quit()
-
+                
+                # Cancel and delete all data
                 elif user_confirmation.strip().lower() == "n":
-                    quit()
+                    self.deleteData()
 
 
     """
@@ -335,6 +337,51 @@ class Program:
 
                 if confirmation.strip().lower() == "y":
                     try:
+
+                        # Makes a random password if the input for the password is "/random"
+                        if password_input == ("/r"):
+
+                            generated_password = ""
+                            for _ in range(self.random_password_len):
+                                char = random.choice("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-_=+[]|;:,<.>/?")
+                                generated_password += char
+                            
+                            password_input = generated_password
+
+
+                        # Makes a random username is the input is "/random"
+                        if username_input == ("/r"):
+
+                            with open("random_words.json") as file:
+                                random_words = json.load(file)
+
+                            generated_username = ""
+                            for i in range(3):
+                                word = random.choice(random_words["data"])
+                                # Don't capitalize the first word
+                                word = word if i == 0 else word.capitalize() 
+                                generated_username += word
+                            
+                            username_input = generated_username
+ 
+                        elif username_input == ("/d"):
+
+                            self.master_database.cursor.execute(f"""SELECT * FROM {self.master_database.table_name}""")
+                            items = self.master_database.cursor.fetchall()
+
+                            username_input = self.crypto.decrypt(items[0][0], self.enc_key)
+
+
+                        # Set default email account
+                        if email_input == ("/d"):
+
+                            self.master_database.cursor.execute(f"""SELECT * FROM {self.master_database.table_name}""")
+                            items = self.master_database.cursor.fetchall()
+
+                            email_input = self.crypto.decrypt(items[0][3], self.enc_key)
+
+
+                        # Insert data to table
                         self.accounts_database.insertToDatabase(
                             self.crypto.encrypt(username_input, self.enc_key),
                             self.crypto.encrypt(website_name_input, self.enc_key),
@@ -398,7 +445,7 @@ class Program:
                     items = self.accounts_database.cursor.fetchall()
 
                     if len(items) == 0:
-                        self.notifyUser("  cant find item")
+                        self.notifyUser("  cannott find item")
                         break
                     else:
                         self.accounts_database.deleteFromDatabase(f"WHERE username = '{self.crypto.encrypt(username_input, self.enc_key)}' AND website_name = '{self.crypto.encrypt(website_name_input, self.enc_key)}'")
@@ -435,11 +482,12 @@ class Program:
         run = True
         while run:
             print("\n  <search>")
-            user_input = input("  website name>>").strip()
+            user_input = input("  website name>>")
 
             # Try fetching from the database
             try:
-                self.accounts_database.cursor.execute(f"""SELECT * FROM {self.accounts_database.table_name} WHERE website_name={user_input}""")
+                encrypted_website_name = self.crypto.encrypt(user_input, self.enc_key)
+                self.accounts_database.cursor.execute(f"""SELECT * FROM {self.accounts_database.table_name} WHERE website_name='{encrypted_website_name}'""")
                 items = self.accounts_database.cursor.fetchall()
                 print(f"found {len(items)} item(s)")
                 
