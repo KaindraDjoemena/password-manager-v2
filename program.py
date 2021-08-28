@@ -95,6 +95,12 @@ class Program:
         self.accounts_database.deleteTable()
         self.master_database.deleteTable()
 
+        del self.accounts_database
+        del self.master_database
+
+        os.remove("accounts_database.db")
+        os.remove("master_database.db")
+
         quit()
 
 
